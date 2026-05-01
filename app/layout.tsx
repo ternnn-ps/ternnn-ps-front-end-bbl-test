@@ -1,28 +1,14 @@
-import Sidebar from "@/components/Sidebar";
-import { Box } from "@mui/material";
+import "./globals.css";
+import "leaflet/dist/leaflet.css";
 
-const drawerWidth = 240;
+import AppShell from "@/components/AppShell";
+import { ReactNode } from "react";
 
-export default function RootLayout({ children }: any) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html>
+    <html lang="en">
       <body>
-        <Box sx={{ display: "flex" }}>
-          
-          <Sidebar />
-
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              p: 3,
-              marginLeft: `${drawerWidth}px`, 
-            }}
-          >
-            {children}
-          </Box>
-
-        </Box>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

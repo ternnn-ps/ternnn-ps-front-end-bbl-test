@@ -1,7 +1,13 @@
 import axios from "axios";
-import { MasterCustomerCriteria, Customer } from "@/types/customer";
+import {
+  MasterCustomerCriteria,
+  Customer,
+  PageResponse,
+  ResponseModel,
+} from "@/types/customer";
 
 const BASE_URL = "http://localhost:8080";
+const API_TIMEOUT_MS = 5000;
 
 export const CUSTOMER_API_PATH = {
   search: "/customer/search",
@@ -10,50 +16,51 @@ export const CUSTOMER_API_PATH = {
   delete: "/customer/delete",
 };
 
+type SortField = {
+  field: string;
+  order: 1 | -1;
+};
+
 export class CustomerService {
-
   async search(
-  data: MasterCustomerCriteria,
-  page: number = 0,
-  size: number = 10,
-  sort?: any[]
-) {
-  const paging = this.generatePagingStr(size, page, sort);
+    data: MasterCustomerCriteria,
+    page: number = 0,
+    size: number = 10,
+    sort?: SortField[]
+  ): Promise<ResponseModel<PageResponse<Customer>> | undefined> {
+    const paging = this.generatePagingStr(size, page, sort);
 
-  const keywordParam = data?.keyword
-    ? `&keyword=${encodeURIComponent(data.keyword)}`
-    : "";
+    const keywordParam = data?.keyword
+      ? `&keyword=${encodeURIComponent(data.keyword)}`
+      : "";
 
-  const url = `${BASE_URL}${CUSTOMER_API_PATH.search}${paging}${keywordParam}`;
+    const url = `${BASE_URL}${CUSTOMER_API_PATH.search}${paging}${keywordParam}`;
 
-  try {
-    const response = await axios.get(url); // ✅ FIXED
+    const response = await axios.get(url, { timeout: API_TIMEOUT_MS });
     return response.data;
-  } catch (error) {
-    console.error(error);
   }
-}
 
   async create(data: Customer) {
-    return axios.post(`${BASE_URL}${CUSTOMER_API_PATH.create}`, data)
-      .then(res => res.data);
+    return axios
+      .post(`${BASE_URL}${CUSTOMER_API_PATH.create}`, data, { timeout: API_TIMEOUT_MS })
+      .then((res) => res.data);
   }
 
   async update(data: Customer) {
-    return axios.put(`${BASE_URL}${CUSTOMER_API_PATH.update}`, data)
-      .then(res => res.data);
+    return axios
+      .put(`${BASE_URL}${CUSTOMER_API_PATH.update}`, data, { timeout: API_TIMEOUT_MS })
+      .then((res) => res.data);
   }
 
   async delete(customerId: number) {
-  return axios.post(
-    `${BASE_URL}${CUSTOMER_API_PATH.delete}`,
-    {
-      userId: customerId
-    }
-  ).then(res => res.data);
-}
+    return axios
+      .post(`${BASE_URL}${CUSTOMER_API_PATH.delete}`, {
+        customerId,
+      }, { timeout: API_TIMEOUT_MS })
+      .then((res) => res.data);
+  }
 
-  private generatePagingStr(size?: number, page?: number, sort?: any[]): string {
+  private generatePagingStr(size?: number, page?: number, sort?: SortField[]): string {
     let paging = "?";
 
     if (size !== undefined) paging += `size=${size}&`;
